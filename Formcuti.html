@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-image: url('pelabuhan.jpg');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #fff;
+            text-shadow: 2px 2px 4px #000;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            margin-top: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+
+        .form-container h2 {
+            margin-top: 0;
+            color: #0023ec;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .form-container label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        .form-container input,
+        .form-container textarea {
+            width: 96%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 2px;
+            font-size: 14px;
+        }
+
+        .form-container input,
+        .form-container textarea {
+            background-color: rgba(255, 255, 255, 0.8);
+            color: #000;
+        }
+
+        .form-container input[type="file"] {
+            padding: 5px;
+        }
+
+        .form-container button {
+            width: 100%;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 10px;
+        }
+
+        .form-container button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>PENGAJUAN CUTI</h2>
+        <form id="leave-form">
+            <label for="name">Nama</label>
+            <input type="text" id="name" name="name" placeholder="Nama" required>
+
+            <label for="date-request">Tanggal Pengajuan</label>
+            <input type="date" id="date-request" name="dateRequest" required>
+
+            <label for="start-date">Tanggal Mulai</label>
+            <input type="date" id="start-date" name="startDate" required>
+
+            <label for="end-date">Tanggal Akhir</label>
+            <input type="date" id="end-date" name="endDate" required>
+
+            <label for="leave-reason">Alasan Cuti</label>
+            <textarea id="leave-reason" name="leaveReason" required></textarea>
+
+            <label for="file-upload">Berkas Pengajuan Cuti</label>
+            <input type="file" id="file-upload" name="file">
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const index = urlParams.get('index');
+            
+            if (index !== null) {
+                // Edit mode
+                const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests')) || [];
+                const request = leaveRequests[index];
+
+                document.getElementById('name').value = request.name;
+                document.getElementById('date-request').value = request.dateRequest;
+                document.getElementById('start-date').value = request.startDate;
+                document.getElementById('end-date').value = request.endDate;
+                document.getElementById('leave-reason').value = request.leaveReason;
+                // Note: File input cannot set default value due to security reasons
+
+                document.getElementById('leave-form').addEventListener('submit', function(event) {
+                    event.preventDefault();
+
+                    const formData = new FormData(event.target);
+                    const updatedLeaveRequest = {};
+                    formData.forEach((value, key) => {
+                        if (key === 'file') {
+                            updatedLeaveRequest[key] = value.name || '';
+                        } else {
+                            updatedLeaveRequest[key] = value;
+                        }
+                    });
+
+                    leaveRequests[index] = updatedLeaveRequest;
+                    localStorage.setItem('leaveRequests', JSON.stringify(leaveRequests));
+
+                    window.location.href = 'Detail.html';
+                });
+            } else {
+                // Add new request mode
+                document.getElementById('leave-form').addEventListener('submit', function(event) {
+                    event.preventDefault();
+
+                    const formData = new FormData(event.target);
+                    const newLeaveRequest = {};
+                    formData.forEach((value, key) => {
+                        if (key === 'file') {
+                            newLeaveRequest[key] = value.name || '';
+                        } else {
+                            newLeaveRequest[key] = value;
+                        }
+                    });
+
+                    const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests')) || [];
+                    leaveRequests.push(newLeaveRequest);
+                    localStorage.setItem('leaveRequests', JSON.stringify(leaveRequests));
+
+                    window.location.href = 'Detail.html';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

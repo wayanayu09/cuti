@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail Cuti</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            background: #f5f5f5;
+        }
+
+        .sidebar {
+            width: 20%;
+            background-color: #1e3c72;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            padding-top: 20px;
+            position: fixed;
+            height: 100%;
+        }
+
+        .profile-pic {
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            background: url('user.png') no-repeat center center;
+            background-size: cover;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .nav-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .nav-item img {
+            width: 30px;
+            height: 30px;
+            margin-right: 15px;
+            filter: brightness(0) invert(1); /* Mengubah warna ikon menjadi putih */
+            transform: translateY(-2px); /* Menyesuaikan posisi ikon ke tengah */
+        }
+
+        .nav-item a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            display: flex;
+            align-items: center; /* Menyelaraskan teks dengan ikon */
+        }
+
+        .details-container {
+            width: 75%;
+            margin-left: 20%;
+            background-color: white;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .details-container h2 {
+            margin-bottom: 20px;
+            font-size: 2px;
+            color: #333;
+        }
+
+        .search-box {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 300px;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            padding-left: 35px;
+            box-sizing: border-box;
+        }
+
+        .search-box img {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+        }
+
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .details-table th, .details-table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .details-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #1e3c72;
+            text-align: center;
+        }
+
+        .details-table td {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-buttons button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #1e3c72;
+            color: white;
+            font-size: 14px;
+        }
+
+        .file-upload {
+            border: 1px solid #ddd;
+            padding: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="profile-pic"></div>
+        <div class="nav-item">
+            <a href="dashboard.html">
+                <img src="icondashboard.png" alt="Dashboard">
+                Dashboard
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="formcuti.html">
+                <img src="iconform.png" alt="Form Cuti">
+                Form Cuti
+            </a>
+        </div>
+    </div>
+    <div class="details-container">
+        <h2>DAFTAR CUTI</h2>
+        <div class="search-box">
+            <img src="cari.jpg" alt="Search Icon">
+            <input type="text" id="search-box" placeholder="Cari berdasarkan nama..." onkeyup="searchTable()">
+        </div>
+        <table class="details-table">
+            <thead>
+                <tr>
+                    <th>NO</th>
+                    <th>Nama</th>
+                    <th>Tanggal Pengajuan</th>
+                    <th>Tanggal Mulai</th>
+                    <th>Tanggal Akhir</th>
+                    <th>Alasan Cuti</th>
+                    <th>Berkas Pengajuan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="leave-requests-body">
+                <!-- Data will be injected here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            loadTableData();
+
+            function loadTableData() {
+                const leaveRequests = JSON.parse(localStorage.getItem('leaveRequests')) || [];
+                const tableBody = document.getElementById('leave-requests-body');
+                tableBody.innerHTML = ''; // Clear existing rows
+
+                leaveRequests.forEach((request, index) => {
+                    const row = document.createElement('tr');
+
+                    const noCell = document.createElement('td');
+                    noCell.textContent = index + 1;
+                    row.appendChild(noCell);
+
+                    const nameCell = document.createElement('td');
+                    nameCell.textContent = request.name;
+                    row.appendChild(nameCell);
+
+                    const dateRequestCell = document.createElement('td');
+                    dateRequestCell.textContent = request.dateRequest;
+                    row.appendChild(dateRequestCell);
+
+                    const startDateCell = document.createElement('td');
+                    startDateCell.textContent = request.startDate;
+                    row.appendChild(startDateCell);
+
+                    const endDateCell = document.createElement('td');
+                    endDateCell.textContent = request.endDate;
+                    row.appendChild(endDateCell);
+
+                    const leaveReasonCell = document.createElement('td');
+                    leaveReasonCell.textContent = request.leaveReason;
+                    row.appendChild(leaveReasonCell);
+
+                    const fileUploadCell = document.createElement('td');
+                    if (request.file) {
+                        const fileLink = document.createElement('a');
+                        fileLink.href = request.file;
+                        fileLink.textContent = 'Download';
+                        fileLink.target = '_blank';
+                        fileUploadCell.appendChild(fileLink);
+                    } else {
+                        fileUploadCell.textContent = 'No File';
+                    }
+                    row.appendChild(fileUploadCell);
+
+                    const actionCell = document.createElement('td');
+                    const actionButtons = document.createElement('div');
+                    actionButtons.className = 'action-buttons';
+
+                    const editButton = document.createElement('button');
+                    editButton.textContent = 'Edit';
+                    editButton.addEventListener('click', () => editRequest(index));
+                    actionButtons.appendChild(editButton);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Delete';
+                    deleteButton.addEventListener('click', () => deleteRequest(index));
+                    actionButtons.appendChild(deleteButton);
+
+                    actionCell.appendChild(actionButtons);
+                    row.appendChild(actionCell);
+
+                    tableBody.appendChild(row);
+                });
+            }
+
+            function deleteRequest(index) {
+                let leaveRequests = JSON.parse(localStorage.getItem('leaveRequests')) || [];
+                leaveRequests.splice(index, 1);
+                localStorage.setItem('leaveRequests', JSON.stringify(leaveRequests));
+                loadTableData();
+            }
+
+            function editRequest(index) {
+                let leaveRequests = JSON.parse(localStorage.getItem('leaveRequests')) || [];
+                const request = leaveRequests[index];
+                window.location.href = `formcuti.html?index=${index}&name=${request.name}&dateRequest=${request.dateRequest}&startDate=${request.startDate}&endDate=${request.endDate}&leaveReason=${request.leaveReason}&file=${request.file || ''}`;
+            }
+        });
+
+        function searchTable() {
+            const searchBox = document.getElementById('search-box');
+            const filter = searchBox.value.toLowerCase();
+            const tableBody = document.getElementById('leave-requests-body');
+            const rows = tableBody.getElementsByTagName('tr');
+
+            Array.from(rows).forEach(row => {
+                const cells = row.getElementsByTagName('td');
+                const nameCell = cells[1];
+                if (nameCell) {
+                    const txtValue = nameCell.textContent || nameCell.innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
